@@ -5,70 +5,390 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DecisionTraces – Trace Decisions with Context</title>
     <style>
+        :root {
+            --accent: #00A2FF;
+            --accent-light: rgba(0, 162, 255, 0.25);
+            --accent-bg: rgba(0, 162, 255, 0.08);
+            --muted: #94a3b8;
+            --foreground: #f1f5f9;
+            --border: #334155;
+            --card-bg: #1e293b;
+        }
+        * { box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             margin: 0;
             padding: 0;
-            color: #333;
-            background-color: #f8f9fa;
+            color: var(--foreground);
+            background-color: #121212;
+            position: relative;
+            min-height: 100vh;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
+        .container { max-width: 1152px; margin: 0 auto; padding: 0 1.5rem; }
+        @media (min-width: 640px) { .container { padding: 0 1.5rem; } }
+        @media (min-width: 1024px) { .container { padding: 0 2rem; } }
+
+        /* Hero: canvas limited to this section */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
+            padding: 3rem 2rem 4rem;
         }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+        .hero .bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
-        p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
+        .hero .container {
+            position: relative;
+            z-index: 1;
         }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .hero p { font-size: 1.2rem; margin-bottom: 2rem; color: var(--muted); }
         .cta-button {
             display: inline-block;
-            background-color: #28a745;
+            background: rgba(0, 162, 255, 0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             color: white;
-            padding: 0.8rem 1.5rem;
+            padding: 0.75rem 1.5rem;
             text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            margin: 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: background 0.2s, box-shadow 0.2s;
         }
-        .features {
+        .cta-button:hover {
+            background: rgba(0, 162, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 162, 255, 0.3);
+        }
+
+        /* Block 1: Features (3 cards) */
+        .section-features {
+            border-top: 1px solid var(--border);
+            background: var(--accent-bg);
+            padding: 3rem 0 4rem;
+        }
+        @media (min-width: 640px) { .section-features { padding: 4rem 0; } }
+        .section-features .heading { text-align: center; margin-bottom: 2rem; }
+        .section-features .heading h2 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin: 0;
+        }
+        @media (min-width: 640px) { .section-features .heading h2 { font-size: 2.25rem; } }
+        .section-features .heading p {
+            margin: 0.75rem 0 0;
+            font-size: 1.125rem;
+            color: var(--muted);
+        }
+        .features-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: 1fr;
+        }
+        @media (min-width: 640px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1024px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: box-shadow 0.2s;
+        }
+        .card:hover { box-shadow: 0 4px 20px rgba(0, 162, 255, 0.15); }
+        .card-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 8px;
+            background: var(--accent-light);
             display: flex;
-            justify-content: space-around;
-            margin: 3rem 0;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
         }
-        .feature {
-            flex: 1;
-            padding: 1rem;
+        .card-icon svg { width: 1.5rem; height: 1.5rem; color: var(--accent); }
+        .card h3 { font-size: 1.125rem; font-weight: 600; margin: 0 0 0.25rem; }
+        .card p { margin: 0; font-size: 0.9375rem; color: var(--muted); line-height: 1.5; }
+
+        /* Block 2: Support */
+        .section-support {
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 0 3rem;
         }
+        @media (min-width: 640px) { .section-support { padding: 3rem 0; } }
+        .section-support .inner { max-width: 42rem; margin: 0 auto; text-align: center; }
+        .section-support h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin: 0;
+        }
+        @media (min-width: 640px) { .section-support h2 { font-size: 1.875rem; } }
+        .section-support p { margin: 0.75rem 0 0; color: var(--muted); }
+        .section-support a {
+            color: var(--accent);
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .section-support a:hover { text-decoration: underline; }
+
+        /* Block 3: Footer */
+        .footer {
+            border-top: 1px solid var(--border);
+            background: var(--accent-bg);
+        }
+        .footer .container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        @media (min-width: 640px) {
+            .footer .container { justify-content: space-between; flex-direction: row; }
+        }
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: var(--muted);
+        }
+        .footer-links a {
+            color: var(--muted);
+            text-decoration: none;
+        }
+        .footer-links a:hover { color: var(--foreground); }
+        .footer-sep { width: 1px; height: 1rem; background: var(--border); }
+        .footer-copy { font-size: 0.875rem; color: var(--muted); margin: 0; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>DecisionTraces</h1>
-        <p>Trace, visualize, and audit decisions with context. Export to PROV-O to avoid vendor lock-in.</p>
-        <a href="mailto:you@decisiontraces.io?subject=Early%20Access" class="cta-button">Request Early Access</a>
-
-        <div class="features">
-            <div class="feature">
-                <h3>Decision Graphs</h3>
-                <p>Visualize how decisions connect and evolve over time.</p>
+    <section id="features" class="section-features">
+        <div class="container">
+            <div class="heading">
+                <h2>Everything you need, in one place</h2>
+                <p>Decision graphs, PROV-O export, and full control — no lock-in.</p>
             </div>
-            <div class="feature">
-                <h3>PROV-O Export</h3>
-                <p>Export your data in standard PROV-O format for interoperability.</p>
-            </div>
-            <div class="feature">
-                <h3>No Lock-in</h3>
-                <p>Your data is always portable and under your control.</p>
+            <div class="features-grid">
+                <div class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>
+                    </div>
+                    <h3>Decision Graphs</h3>
+                    <p>Visualize how decisions connect and evolve over time.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </div>
+                    <h3>PROV-O Export</h3>
+                    <p>Export your data in standard PROV-O format for interoperability.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                    </div>
+                    <h3>No Lock-in</h3>
+                    <p>Your data is always portable and under your control.</p>
+                </div>
             </div>
         </div>
+    </section>
+    <div class="hero">
+        <canvas id="canvas" class="bg-canvas"></canvas>
+        <div class="container">
+            <h1>DecisionTraces</h1>
+            <p>Trace, visualize, and audit decisions with context. Export to PROV-O to avoid vendor lock-in.</p>
+            <a href="mailto:you@decisiontraces.io?subject=Early%20Access" class="cta-button">Request Early Access</a>
+        </div>
     </div>
+
+    <footer class="footer">
+        <div class="container">
+        </div>
+    </footer>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const hero = canvas.parentElement;
+
+            function resize() {
+                if (!hero) return;
+                const w = hero.offsetWidth;
+                const h = hero.offsetHeight;
+                canvas.width = w;
+                canvas.height = h;
+            }
+            resize();
+
+            const circles = [];
+            let maxCircles = 6 + Math.floor(Math.random() * 7);
+            const minRadius = 5;
+            const maxRadius = 15;
+            const colors = ['rgba(150, 0, 255, 0.7)', 'rgba(200, 0, 255, 0.7)'];
+            let footprint = { x: canvas.width / 2, y: canvas.height / 2, radius: 0 };
+
+            function drawCircle(x, y, radius, filled) {
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                if (filled) {
+                    ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                    ctx.fill();
+                } else {
+                    ctx.strokeStyle = colors[Math.floor(Math.random() * colors.length)];
+                    ctx.stroke();
+                }
+            }
+
+            function drawLineSlowly(x1, y1, x2, y2, callback) {
+                const steps = 50;
+                let step = 0;
+                const interval = setInterval(function() {
+                    step++;
+                    const progress = step / steps;
+                    const x = x1 + (x2 - x1) * progress;
+                    const y = y1 + (y2 - y1) * progress;
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x, y);
+                    ctx.strokeStyle = 'rgba(150, 0, 255, 0.5)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    if (step >= steps) {
+                        clearInterval(interval);
+                        if (callback) callback();
+                    }
+                }, 20);
+            }
+
+            function updateFootprint() {
+                if (circles.length === 0) return;
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                circles.forEach(function(circle) {
+                    minX = Math.min(minX, circle.x - circle.radius);
+                    minY = Math.min(minY, circle.y - circle.radius);
+                    maxX = Math.max(maxX, circle.x + circle.radius);
+                    maxY = Math.max(maxY, circle.y + circle.radius);
+                });
+                const centerX = (minX + maxX) / 2;
+                const centerY = (minY + maxY) / 2;
+                const radius = Math.max(maxX - centerX, maxY - centerY) * 1.1;
+                footprint = { x: centerX, y: centerY, radius: radius };
+            }
+
+            function fitsInCanvas(x, y, radius) {
+                return x - radius >= 0 && x + radius <= canvas.width &&
+                    y - radius >= 0 && y + radius <= canvas.height;
+            }
+
+            function addCircle() {
+                if (circles.length >= maxCircles) {
+                    setTimeout(fadeOutAndRestart, 1000);
+                    return;
+                }
+                const radius = minRadius + Math.random() * (maxRadius - minRadius);
+                const padding = radius + 2;
+                const maxX = canvas.width - padding;
+                const maxY = canvas.height - padding;
+                const minXY = padding;
+                var x, y;
+                if (circles.length === 0) {
+                    do {
+                        x = minXY + Math.random() * (maxX - minXY);
+                        y = minXY + Math.random() * (maxY - minXY);
+                    } while (!fitsInCanvas(x, y, radius));
+                    const filled = Math.random() > 0.5;
+                    circles.push({ x: x, y: y, radius: radius, filled: filled });
+                    drawCircle(x, y, radius, filled);
+                    updateFootprint();
+                } else {
+                    var attempts = 0;
+                    var maxAttempts = 150;
+                    do {
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = footprint.radius + 20 + Math.random() * 50;
+                        x = footprint.x + distance * Math.cos(angle);
+                        y = footprint.y + distance * Math.sin(angle);
+                        attempts++;
+                    } while (!fitsInCanvas(x, y, radius) && attempts < maxAttempts);
+                    if (attempts >= maxAttempts) {
+                        setTimeout(addCircle, 500);
+                        return;
+                    }
+                    const filled = Math.random() > 0.5;
+                    circles.push({ x: x, y: y, radius: radius, filled: filled });
+                    drawCircle(x, y, radius, filled);
+                    var nearestCircle = circles[0];
+                    var minDistance = Infinity;
+                    for (var i = 0; i < circles.length - 1; i++) {
+                        var other = circles[i];
+                        var d = Math.sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
+                        if (d < minDistance) {
+                            minDistance = d;
+                            nearestCircle = other;
+                        }
+                    }
+                    drawLineSlowly(nearestCircle.x, nearestCircle.y, x, y, function() {
+                        updateFootprint();
+                    });
+                }
+                setTimeout(addCircle, 500);
+            }
+
+            function fadeOutAndRestart() {
+                var opacity = 1;
+                var fadeInterval = setInterval(function() {
+                    opacity -= 0.02;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.globalAlpha = opacity;
+                    circles.forEach(function(circle) {
+                        drawCircle(circle.x, circle.y, circle.radius, circle.filled);
+                    });
+                    if (opacity <= 0) {
+                        clearInterval(fadeInterval);
+                        ctx.globalAlpha = 1;
+                        circles.length = 0;
+                        footprint = { x: canvas.width / 2, y: canvas.height / 2, radius: 0 };
+                        maxCircles = 6 + Math.floor(Math.random() * 7);
+                        setTimeout(addCircle, 1000);
+                    }
+                }, 50);
+            }
+
+            addCircle();
+            function onResize() {
+                resize();
+                circles.length = 0;
+                footprint = { x: canvas.width / 2, y: canvas.height / 2, radius: 0 };
+                maxCircles = 6 + Math.floor(Math.random() * 7);
+                setTimeout(addCircle, 300);
+            }
+            window.addEventListener('resize', onResize);
+            if (typeof ResizeObserver !== 'undefined') {
+                new ResizeObserver(onResize).observe(hero);
+            }
+        })();
+    </script>
 </body>
 </html>
 
